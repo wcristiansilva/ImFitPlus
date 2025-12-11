@@ -5,11 +5,15 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.Data.ImFitPlusDao
+import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.Model.CalculationHistory
+import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.Model.User
 import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.databinding.ActivityDadosPessoaisBinding
 
 class DadosPessoaisActivity: AppCompatActivity() {
 
     private lateinit var binding: ActivityDadosPessoaisBinding
+    private val dao by lazy { ImFitPlusDao(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,22 +29,50 @@ class DadosPessoaisActivity: AppCompatActivity() {
         binding.btnCalcularImc.setOnClickListener {
             if (validarCampos()) {
                 val nome = binding.etNome.text.toString()
-                val idade = binding.etIdade.text.toString()
+                val idade = binding.etIdade.text.toString().toInt()
                 val altura = binding.etAltura.text.toString().toDouble()
                 val peso = binding.etPeso.text.toString().toDouble()
                 val sexo = if (binding.rgSexo.checkedRadioButtonId == R.id.rbMasculino) "M" else "F"
-                val nivelAtividade = binding.spinnerAtividade.selectedItemPosition
+                val nivelAtividadeTexto = binding.spinnerAtividade.selectedItem.toString()
+
+
+                val newUser = User(
+                    id = 0,
+                    name = nome,
+                    age = idade,
+                    gender = sexo,
+                    height = altura,
+                    weight = peso,
+                    activityLevel = nivelAtividadeTexto
+                )
+
+                val userId = dao.saveUser(newUser)
+
+                // Falta criar as funções de calculo abaixo
 
                 val imc = peso / (altura * altura)
+                val tmb = calculaTMB(peso, altura, idade, sexo)
+                val pesoIdeal = calculaPesoIdeal(altura)
+                val categoriaImc = obterCategoriaImc(imc)
+
+                val newCalculo = CalculationHistory(
+                    id = 0,
+                    userId = userId,
+                    imc = imc,
+                    imcCategory = categoriaImc,
+                    tmb = tmb,
+                    idealWeight = pesoIdeal,
+                    timestamp = System.currentTimeMillis()
+                )
+
+                dao.saveCalculation(newCalculo)
 
                 val intent = Intent(this, ResultadoImcActivity::class.java).apply {
-                    putExtra("nome", nome)
-                    putExtra("idade", idade)
-                    putExtra("sexo", sexo)
-                    putExtra("altura", altura)
-                    putExtra("peso", peso)
-                    putExtra("nivelAtividade", nivelAtividade)
-                    putExtra("imc", imc)
+                    putExtra("IMC_RESULTADO", imc)
+                    putExtra("IMC_CATEGORIA", categoriaImc)
+                    putExtra("TMB_RESULTADO", tmb)
+                    putExtra("IDEAL_WEIGHT_RESULTADO", pesoIdeal)
+                    putExtra("USER_ID", userId)
                 }
                 startActivity(intent)
             }
@@ -82,5 +114,27 @@ class DadosPessoaisActivity: AppCompatActivity() {
         return true
     }
 
+    private fun obterCategoriaImc(imc: Double): String {
+        return when {
+            imc < 18.5 -> "Abaixo do peso"
+            imc < 24.9 -> "Peso normal"
+            imc < 29.9 -> "Sobrepeso"
+            imc < 34.9 -> "Obesidade Grau I"
+            imc < 39.9 -> "Obesidade Grau II"
+            else -> "Obesidade Grau III"
+        }
+    }
+
+    private fun calculaTMB(peso: Double, altura: Double, idade: Int, sexo: String): Double {
+        return if (sexo == "M"){
+            88.362 + (13.397 * peso) + (4.799 * (altura * 100)) - (5.677 * idade)
+        } else {
+            447.593 + (9.247 * peso) + (3.098 * (altura * 100)) - (4.330 * idade)
+        }
+    }
+
+    private fun calculaPesoIdeal(altura: Double): Double {
+        return (altura * altura) * 22.5
+    }
 
 }
