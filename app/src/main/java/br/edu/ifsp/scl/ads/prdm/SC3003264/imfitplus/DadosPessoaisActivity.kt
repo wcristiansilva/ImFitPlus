@@ -1,9 +1,13 @@
 package br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import java.time.LocalDate
+import java.time.Period
 import androidx.appcompat.app.AppCompatActivity
 import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.Data.ImFitPlusDao
 import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.Model.CalculationHistory
@@ -15,6 +19,7 @@ class DadosPessoaisActivity: AppCompatActivity() {
     private lateinit var binding: ActivityDadosPessoaisBinding
     private val dao by lazy { ImFitPlusDao(this) }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDadosPessoaisBinding.inflate(layoutInflater)
@@ -29,7 +34,7 @@ class DadosPessoaisActivity: AppCompatActivity() {
         binding.btnCalcularImc.setOnClickListener {
             if (validarCampos()) {
                 val nome = binding.etNome.text.toString()
-                val idade = binding.etIdade.text.toString().toInt()
+                val idade = calcularIdade(LocalDate.of(1983, 1, 25)) // ano, mês  e dia
                 val altura = binding.etAltura.text.toString().toDouble()
                 val pesoAtual = binding.etPeso.text.toString().toDouble()
                 val sexo = if (binding.rgSexo.checkedRadioButtonId == R.id.rbMasculino) "M" else "F"
@@ -74,6 +79,8 @@ class DadosPessoaisActivity: AppCompatActivity() {
                     putExtra("USER_ID", userId)
 
                     putExtra("name", nome)
+                    putExtra("idade", idade)
+                    putExtra("dataNascimento", dataNascimento)
                     putExtra("altura", altura)
                     putExtra("pesoAtual", pesoAtual)
                     putExtra("sexo", sexo)
@@ -83,6 +90,8 @@ class DadosPessoaisActivity: AppCompatActivity() {
             }
         }
     }
+
+
 
     private fun validarCampos(): Boolean {
         val nome = binding.etNome.text.toString().trim()
@@ -99,9 +108,11 @@ class DadosPessoaisActivity: AppCompatActivity() {
         val altura = alturaStr.toDoubleOrNull()
         val peso = pesoStr.toDoubleOrNull()
 
-        if (idade == null || idade !in 10..100){
+        if (idade == null ){ //|| idade !in 10..100
             Toast.makeText(this, "Idade inválida!", Toast.LENGTH_SHORT).show()
             return false
+        } else {
+            Toast.makeText(this, "${idadeStr}", Toast.LENGTH_SHORT).show() // retorna 19920619
         }
         if (altura == null || altura <= 0) {
             Toast.makeText(this, "Altura inválida!", Toast.LENGTH_SHORT).show()
@@ -143,5 +154,13 @@ class DadosPessoaisActivity: AppCompatActivity() {
     private fun calculaPesoIdeal(altura: Double): Double {
         return  (altura * altura) * 22.5
     }
+
+    fun calcularIdade(dataNascimento: LocalDate): Int {
+        val hoje = LocalDate.now()
+        var idade = Period.between(dataNascimento, hoje).years
+        return  idade
+    }
+
+
 
 }

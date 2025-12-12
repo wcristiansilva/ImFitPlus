@@ -19,6 +19,8 @@ class ResultadoImcActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val name = intent.getStringExtra("name") ?: "Usuário"
+        val idade = intent.getIntExtra("idade", 0)
+        val dataNascimento = intent.getStringExtra("dataNascimento") ?: "00/00/0000"
         val imc = intent.getDoubleExtra("IMC_RESULTADO", 0.0)
         val categoriaImc = intent.getStringExtra("IMC_CATEGORIA")
         val tmb = intent.getDoubleExtra("TMB_RESULTADO", 0.0)
@@ -55,6 +57,7 @@ class ResultadoImcActivity : AppCompatActivity() {
             }
         }
         binding.tvCategoria.text = categoria
+        binding.tvCategoria.text = dataNascimento.toString()
 
         binding.btnGastoCalorico.setOnClickListener {
             val intent = Intent(this, GastoCaloricoActivity::class.java).apply {

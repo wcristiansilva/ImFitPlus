@@ -22,7 +22,6 @@
         android:backgroundTint="#2196F3"
         android:text="Comece aqui"
         app:iconTint="#03A9F4" />
-
-
+    
 
 </LinearLayout>

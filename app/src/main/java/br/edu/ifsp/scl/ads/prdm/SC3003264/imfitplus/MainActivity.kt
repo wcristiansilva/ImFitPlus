@@ -5,7 +5,7 @@
  import androidx.appcompat.app.AppCompatActivity
  import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -19,5 +19,7 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, DadosPessoaisActivity::class.java)
             startActivity(intent)
         }
+
+
     }
 }
