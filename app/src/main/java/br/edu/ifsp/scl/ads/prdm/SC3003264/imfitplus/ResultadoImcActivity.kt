@@ -2,10 +2,12 @@ package br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus
 
 import android.app.Activity
 import android.content.Intent
+import android.icu.text.DecimalFormat
 import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.databinding.ActivityResultadoImcBinding
+
 
 class ResultadoImcActivity : AppCompatActivity() {
 
@@ -16,11 +18,22 @@ class ResultadoImcActivity : AppCompatActivity() {
         binding = ActivityResultadoImcBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val nome = intent.getStringExtra("nome") ?: "Usuário"
-        val imc = intent.getDoubleExtra("imc", 0.0)
+        val name = intent.getStringExtra("name") ?: "Usuário"
+        val imc = intent.getDoubleExtra("IMC_RESULTADO", 0.0)
+        val categoriaImc = intent.getStringExtra("IMC_CATEGORIA")
+        val tmb = intent.getDoubleExtra("TMB_RESULTADO", 0.0)
+        val pesoIdeal = intent.getDoubleExtra("IDEAL_WEIGHT_RESULTADO", 0.0)
+        val pesoAtual = intent.getDoubleExtra("pesoAtual", 0.0)
+        val nivelAtividadePosicao = intent.getIntExtra("nivelAtividadePosicao", 0)
 
-        binding.tvNome.text = "Olá, $nome!"
-        binding.tvImc.text = String.format("IMC: %.2f", imc)
+
+        val df = DecimalFormat("#.##")
+        val imcFormatado = df.format(imc)
+        val tmbFormatado = df.format(tmb)
+        //val pesoIdealFormatado = df.format(pesoIdeal)
+
+        binding.tvNome.text = "Olá, $name!"
+        binding.tvImc.text = String.format("Seu IMC é: %.2f", imc)
 
         var categoria = ""
         when {
@@ -45,12 +58,14 @@ class ResultadoImcActivity : AppCompatActivity() {
 
         binding.btnGastoCalorico.setOnClickListener {
             val intent = Intent(this, GastoCaloricoActivity::class.java).apply {
-                putExtra("nome", nome)
+                putExtra("nome", name)
                 putExtra("idade", intent.getIntExtra("idade", 0))
                 putExtra("sexo", intent.getStringExtra("sexo"))
                 putExtra("altura", intent.getDoubleExtra("altura", 0.0))
-                putExtra("peso", intent.getDoubleExtra("peso", 0.0))
-                putExtra("nivelAtividade", intent.getIntExtra("nivelAtividade", 0))
+                putExtra("pesoIdeal", pesoIdeal)
+                putExtra("pesoAtual", pesoAtual)
+                putExtra("nivelAtividadePosicao", nivelAtividadePosicao)
+                putExtra("TMB_RESULTADO", tmb)
             }
             startActivity(intent)
         }

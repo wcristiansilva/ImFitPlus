@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import br.edu.ifsp.scl.ads.prdm.SC3003264.imfitplus.databinding.ActivityGastoCaloricoBinding
+import java.text.DecimalFormat
 
 class GastoCaloricoActivity : AppCompatActivity() {
 
@@ -15,30 +16,26 @@ class GastoCaloricoActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val nome = intent.getStringExtra("nome") ?: "Usuário"
-        val idade = intent.getIntExtra("idade", 0)
-        val sexo = intent.getStringExtra("sexo") ?: "M"
         val altura = intent.getDoubleExtra("altura", 0.0)
-        val peso = intent.getDoubleExtra("peso", 0.0)
-        val nivelAtividade = intent.getIntExtra("nivelAtividade", 0)
+        val pesoIdeal = intent.getDoubleExtra("pesoIdeal", 0.0)
+        val pesoAtual = intent.getDoubleExtra("pesoAtual", 0.0)
+        val nivelAtividadePosicao = intent.getIntExtra("nivelAtividadePosicao", 0)
+        val tmb = intent.getDoubleExtra("TMB_RESULTADO", 0.0)
 
-        val alturaCm = altura * 100
-        val tmb = if (sexo == "M") {
-            66 + (13.7 * peso) + (5 * alturaCm) - (6.8 * idade)
-        } else {
-            655 + (9.6 * peso) + (1.8 * alturaCm) - (4.7 * idade)
-        }
 
-        val fatores = doubleArrayOf(1.2, 1.375, 1.55, 1.725)
-        val fator = fatores[nivelAtividade]
+        val fatores = doubleArrayOf(1.2, 1.375, 1.55, 1.725, 1.9)
+        val fator = fatores[nivelAtividadePosicao]
         val gastoCalorico = tmb * fator
+        val df = DecimalFormat("#.##")
 
-        binding.tvGasto.text = String.format("Gasto Calórico Diário: %.0f kcal", gastoCalorico)
+        binding.tvGasto.text = "Gasto Calórico Diário Ideal: ${df.format(gastoCalorico)} kcal"
 
         binding.btnPesoIdeal.setOnClickListener {
             val intent = Intent(this, PesoIdealActivity::class.java).apply {
                 putExtra("nome", nome)
                 putExtra("altura", altura)
-                putExtra("peso", peso)
+                putExtra("pesoIdeal", pesoIdeal)
+                putExtra("pesoAtual", pesoAtual)
             }
             startActivity(intent)
         }

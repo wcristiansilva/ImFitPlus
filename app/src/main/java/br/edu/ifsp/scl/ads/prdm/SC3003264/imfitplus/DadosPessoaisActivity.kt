@@ -31,9 +31,10 @@ class DadosPessoaisActivity: AppCompatActivity() {
                 val nome = binding.etNome.text.toString()
                 val idade = binding.etIdade.text.toString().toInt()
                 val altura = binding.etAltura.text.toString().toDouble()
-                val peso = binding.etPeso.text.toString().toDouble()
+                val pesoAtual = binding.etPeso.text.toString().toDouble()
                 val sexo = if (binding.rgSexo.checkedRadioButtonId == R.id.rbMasculino) "M" else "F"
                 val nivelAtividadeTexto = binding.spinnerAtividade.selectedItem.toString()
+                val nivelAtividadePosicao = binding.spinnerAtividade.selectedItemPosition
 
 
                 val newUser = User(
@@ -42,16 +43,14 @@ class DadosPessoaisActivity: AppCompatActivity() {
                     age = idade,
                     gender = sexo,
                     height = altura,
-                    weight = peso,
+                    weight = pesoAtual,
                     activityLevel = nivelAtividadeTexto
                 )
 
                 val userId = dao.saveUser(newUser)
 
-                // Falta criar as funções de calculo abaixo
-
-                val imc = peso / (altura * altura)
-                val tmb = calculaTMB(peso, altura, idade, sexo)
+                val imc = pesoAtual / (altura * altura)
+                val tmb = calculaTMB(pesoAtual, altura, idade, sexo)
                 val pesoIdeal = calculaPesoIdeal(altura)
                 val categoriaImc = obterCategoriaImc(imc)
 
@@ -73,6 +72,12 @@ class DadosPessoaisActivity: AppCompatActivity() {
                     putExtra("TMB_RESULTADO", tmb)
                     putExtra("IDEAL_WEIGHT_RESULTADO", pesoIdeal)
                     putExtra("USER_ID", userId)
+
+                    putExtra("name", nome)
+                    putExtra("altura", altura)
+                    putExtra("pesoAtual", pesoAtual)
+                    putExtra("sexo", sexo)
+                    putExtra("nivelAtividadePosicao", nivelAtividadePosicao)
                 }
                 startActivity(intent)
             }
@@ -116,7 +121,9 @@ class DadosPessoaisActivity: AppCompatActivity() {
 
     private fun obterCategoriaImc(imc: Double): String {
         return when {
-            imc < 18.5 -> "Abaixo do peso"
+            imc < 18.5 -> {
+                "Abaixo do peso"
+            }
             imc < 24.9 -> "Peso normal"
             imc < 29.9 -> "Sobrepeso"
             imc < 34.9 -> "Obesidade Grau I"
@@ -134,7 +141,7 @@ class DadosPessoaisActivity: AppCompatActivity() {
     }
 
     private fun calculaPesoIdeal(altura: Double): Double {
-        return (altura * altura) * 22.5
+        return  (altura * altura) * 22.5
     }
 
 }
